@@ -14,6 +14,10 @@ Create a python-2.6 application
 
     rhc app create -a flask -t python-2.6
 
+or a python-2.7 application
+
+    rhc app create -a flask -t python-2.7
+
 Add this upstream flask repo
 
     cd flask

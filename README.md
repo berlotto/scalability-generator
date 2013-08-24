@@ -8,7 +8,7 @@ on OpenShift.
 Running on OpenShift
 ----------------------------
 
-Create an account at http://openshift.redhat.com/
+Create an account at http://getupcloud.com/
 
 Create a python-2.6 application
 
@@ -26,7 +26,7 @@ Then push the repo upstream
 
 That's it, you can now checkout your application at:
 
-    http://flask-$yournamespace.rhcloud.com
+    http://flask-$yournamespace.getup.io
 
 ------------------------------
 

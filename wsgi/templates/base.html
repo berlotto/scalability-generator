@@ -5,10 +5,11 @@
 <head>
 	<meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Foundation 4</title>
+  <title>GetupCloud - Teste de ambiente</title>
 
 
   <link rel="stylesheet" href="/static/foundation/css/foundation.css">
+  <link rel="stylesheet" href="/static/css/app.css">
 
 
   <script src="/static/foundation/js/vendor/custom.modernizr.js"></script>
@@ -16,6 +17,29 @@
 </head>
 <body>
 
+<div class="contain-to-grid fixheight fixed">
+  <nav class="top-bar hide-for-small">
+    <ul class="title-area">
+      <!-- Title Area -->
+      <li class="name">
+        <h1><a class="getuplogo" href="/">Getupcloud</a></h1>
+      </li>
+      <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+      <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
+    </ul>
+
+
+    <section class="top-bar-section">
+      <!-- Right Nav Section -->
+      <ul class="right">
+        <li class="divider"></li>
+        <li class="text">Getup is a scalable cloud computing platform</li>
+        <li><a class="red" href="http://getupcloud.com">getupcloud.com</a></li>
+        <li class="divider"></li>
+      </ul>
+    </section>
+  </nav>
+</div>
   {%block content%}{%endblock%}
 
   <script>

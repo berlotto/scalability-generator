@@ -1,0 +1,46 @@
+{%extends 'base.html'%}
+
+{%block content%}
+	<div class="row">
+		<div class="large-12 columns">
+			<h2>Getup Cloud - Relatório de resultados</h2>
+			<h3>Teste: {{reportid}}</h3>
+			<h3>Executado em: 20/11/2013</h3>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="large-8 columns">
+			<div class="row">
+
+				<table class="report large-12">
+					<tr>
+						<th>Tempo de execução:</th>
+						<td>20 minutos</td>
+					</tr>
+					<tr>
+						<th>Número de acessos total:</th>
+						<td>2000 usuários</td>
+					</tr>
+					<tr>
+						<th>Total de acessos simultaneos:</th>
+						<td>250</td>
+					</tr>
+				</table>
+
+			</div>
+
+		</div>
+
+		<div class="large-4 columns">
+			<h4>Getup</h4>
+			<p>A Getup é uma empresa que presta serviços de hospedagem especializada em aplicações com performance. Veja mais no  <a href="http://getupcloud.com">nosso site</a>.</p>
+
+			<h4>Esta aplicação</h4>
+			<p>Esta aplicação o ajudará a fazer um teste de performance e ambiente nos nossos servidores. Este teste é parametrizado e no final você saberá, através de um relatório, tudo o que ocorreu no teste, com comparativos, previsões de gastos, e tudo mais !</p>
+			<p>O relatório da sua aplicação ficará disponível para posterior consulta através de um link enviado para seu email.</p>
+		</div>
+
+	</div>
+
+{%endblock%}

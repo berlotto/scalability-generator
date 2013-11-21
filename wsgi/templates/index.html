@@ -3,8 +3,7 @@
 {%block content%}
 	<div class="row">
 		<div class="large-12 columns">
-			<h2>Getup Cloud</h2>
-			<h3>Configuração para criar testes de Estress</h3>
+			<h2>Teste de Escalabilidade</h2>
 			<p>Versão 1.0</p>
 			<hr />
 		</div>
@@ -17,9 +16,9 @@
 			<!-- FORM -->
 			<div class="row">
 
-				<form>
+				<form action="{{url_for('begin_test')}}" method="POST">
 					<div class="row">
-						<div class="small-8">
+						<div class="small-11">
 							<div class="row">
 								<div class="small-3 columns">
 									<label for="name" class="right inline">Nome </label>
@@ -59,8 +58,21 @@
 							</div>
 
 							<div class="row">
+								<div class="small-3 columns">
+									<label for="site" class="right inline">Tamanho do teste: </label>
+								</div>
+								<div class="small-9 columns">
+									<select name="tamango" id="tamanho">
+										{%for t in conf.AB_TEST_CONCURRENCY%}
+										<option value="{{t}}">{{t}} conexões</option>
+										{%endfor%}
+									</select>
+								</div>
+							</div>
+
+							<div class="row">
 								<div class="small-6 small-offset-8 columns">
-									<a href="#" class="small success button">Confirmar e iniciar o teste!</a>
+									<input type="submit" class="small success button" value="Confirmar e iniciar o teste!">
 								</div>
 							</div>
 						</div>

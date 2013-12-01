@@ -24,7 +24,7 @@
 									<label for="name" class="right inline">Nome </label>
 								</div>
 								<div class="small-9 columns">
-									<input type="text" id="name" placeholder="Fulano de tal...">
+									<input type="text" id="name" name="name" placeholder="Fulano de tal...">
 								</div>
 							</div>
 
@@ -33,7 +33,7 @@
 									<label for="email" class="right inline">E-Mail </label>
 								</div>
 								<div class="small-9 columns">
-									<input type="text" id="email" placeholder="meu@email.com">
+									<input type="text" id="email" name="email" placeholder="meu@email.com">
 								</div>
 							</div>
 
@@ -43,7 +43,7 @@
 									<label for="empresa" class="right inline">Empresa </label>
 								</div>
 								<div class="small-9 columns">
-									<input type="text" id="empresa" placeholder="Minha Empresa">
+									<input type="text" id="company" name="company" placeholder="Minha Empresa">
 								</div>
 							</div>
 
@@ -53,7 +53,7 @@
 									<label for="site" class="right inline">Site/blog </label>
 								</div>
 								<div class="small-9 columns">
-									<input type="text" id="site" placeholder="http://meusite.com.br">
+									<input type="text" id="site" name="site" placeholder="http://meusite.com.br">
 								</div>
 							</div>
 
@@ -62,7 +62,7 @@
 									<label for="site" class="right inline">Tamanho do teste: </label>
 								</div>
 								<div class="small-9 columns">
-									<select name="tamango" id="tamanho">
+									<select name="test_connections_size" id="test_connections_size">
 										{%for t in conf.AB_TEST_CONCURRENCY%}
 										<option value="{{t}}">{{t}} conexões</option>
 										{%endfor%}

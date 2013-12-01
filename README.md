@@ -1,9 +1,11 @@
-Flask on OpenShift
-==================
+Scalability Generator
+=====================
 
-This git repository helps you get up and running quickly w/ a Flask installation
-on OpenShift.
+This software is a tester creator to apply in your OpenShift environment.
 
+Based in a Flask Example application 
+
+Created by Sérgio Berlotto < sergio.berlotto@gmail.com >
 
 Running on OpenShift
 ----------------------------

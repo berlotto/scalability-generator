@@ -7,13 +7,16 @@ import json
 import base64
 
 def make_request(path, headers=None, **data):
+    # import pdb
+    # pdb.set_trace()
 
     username = conf.API_USER
     password = conf.API_PWD
-    base64string = base64.encodestring('%s:%s' % (username, password))[:-1]
+    up = '%s:%s' % (username, password)
+    base64string = base64.encodestring(up)[:-1]
 
     heads = {
-        "Authorization", "Basic %s" % base64string
+        "Authorization": "Basic %s" % base64string
     }
     if headers:
         if type(headers) != dict:
@@ -22,8 +25,9 @@ def make_request(path, headers=None, **data):
 
     dic_data = {}
     if data:
-        dic_data = params
+        dic_data = data
 
+    print "Requesting POST on %s with data >%s<" % (path,json.dumps(dic_data))
     r = requests.post(path, data=json.dumps(dic_data), headers=heads)
     return r
 
@@ -47,8 +51,6 @@ def create_remote_app(app_name, namespace):
     """
     This method creates the remote app to be called by AB
     """
-    import pdb
-    pdb.set_trace()
     print "Creating the remote app..."
     data = {
         'name': app_name,

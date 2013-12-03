@@ -1,12 +1,14 @@
 # -*- encoding: utf-8 -*-
 
 #API COnfiguration
-BASE_API_PATH = "https://broker.getupcloud.com"
+BASE_API_PREFIX = "htts://"
+BASE_API_DOMAIN = "broker.getupcloud.com"
+BASE_API_PATH = BASE_API_PREFIX + BASE_API_DOMAIN
 API_ADD_APP_PATH = BASE_API_PATH + "/broker/rest/domains/%(domain)s/applications"
 API_VERSION_PATH = BASE_API_PATH + "/broker/rest/api"
 
 API_USER = "demo@getupcloud.com"
-API_PWD = "aFbe7g<jt]nM"
+API_PASSWD = "aFbe7g<jt]nM"
 
 #for the -c parameter of AB
 AB_TEST_CONCURRENCY = [40, 60, 80]

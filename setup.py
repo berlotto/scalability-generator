@@ -6,5 +6,6 @@ setup(name='DemoApp',
       author='Sérgio Berlotto',
       author_email='sergio.berlotto@gmail.com',
       url='http://www.python.org/sigs/distutils-sig/',
-      install_requires=['Flask>=0.10.1', 'MarkupSafe', 'rq', 'requests'],
+      install_requires=open('requirements.txt').readlines(),
+      # install_requires=['Flask>=0.10.1', 'MarkupSafe', 'rq', 'requests'],
      )

@@ -5,13 +5,16 @@ import requests
 import config as conf
 import json
 import base64
+import oshift
+
+openshift = oshift.Openshift(host=conf.BASE_API_DOMAIN,user=conf.API_USER,passwd=conf.API_PASSWD,verbose=True)
 
 def make_request(path, headers=None, **data):
     # import pdb
     # pdb.set_trace()
 
     username = conf.API_USER
-    password = conf.API_PWD
+    password = conf.API_PASSWD
     up = '%s:%s' % (username, password)
     base64string = base64.encodestring(up)[:-1]
 
@@ -43,7 +46,7 @@ def random_hash(bits=96):
     required_length = bits / 8 * 2
     s = hex(random.getrandbits(bits)).lstrip('0x').rstrip('L')
     if len(s) < required_length:
-        return my_hash(bits)
+        return random_hash(bits)
     else:
         return s
 
@@ -51,19 +54,22 @@ def create_remote_app(app_name, namespace):
     """
     This method creates the remote app to be called by AB
     """
-    print "Creating the remote app..."
-    data = {
-        'name': app_name,
-        'cartridge': "php-5.5",
-        'scale': True,
-        'gear_profile':'small'
-    }
+    print "Creating the remote app with oshift..."
 
-    path = conf.API_ADD_APP_PATH % {
-        'domain': namespace
-    }
-    r = make_request(path, **data)
-    print r
+    retorno = openshift.app_create_scale(app_name,"php-5.5",True)
+
+    # data = {
+    #     'name': "app_%s" % app_name,
+    #     'cartridge': "php-5.5",
+    #     # 'scale': True,
+    #     # 'gear_profile':'small'
+    # }
+
+    # path = conf.API_ADD_APP_PATH % {
+    #     'domain': namespace
+    # }
+    # r = make_request(path, **data)
+    # print r
 
 
 def execute_ab_to_app(app_name, test_connections_size, time_created):

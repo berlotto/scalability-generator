@@ -1,9 +1,10 @@
+# -*- encoding: utf-8 -*-
 from setuptools import setup
 
-setup(name='DemoApp',
+setup(name='ScalabilityDemoApp',
       version='1.0',
-      description='OpenShift Demo App',
-      author='Sérgio Berlotto',
+      description='OpenShift scalability demo application',
+      author='Sergio Berlotto',
       author_email='sergio.berlotto@gmail.com',
       url='http://www.python.org/sigs/distutils-sig/',
       install_requires=open('requirements.txt').readlines(),

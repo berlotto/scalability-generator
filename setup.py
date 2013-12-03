@@ -7,6 +7,5 @@ setup(name='ScalabilityDemoApp',
       author='Sergio Berlotto',
       author_email='sergio.berlotto@gmail.com',
       url='http://www.python.org/sigs/distutils-sig/',
-      install_requires=open('requirements.txt').readlines(),
-      # install_requires=['Flask>=0.10.1', 'MarkupSafe', 'rq', 'requests'],
+      install_requires=['Flask>=0.10.1', 'MarkupSafe', 'rq', 'requests', 'redis', 'git+git://github.com/openshift/python-interface.git'],
      )

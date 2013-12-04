@@ -35,19 +35,31 @@ def begin_test():
 	namespace = conf.NAMESPACE_APP2
 
 	#Call to create remote app
-	create_remote_app(testid, namespace)
+	# create_remote_app(testid, namespace)
 	session['testid'] = testid
 
 	#Add to queue for AB test.
-	q.enqueue(execute_ab_to_app, testid, datetime.datetime )
+	q.enqueue(execute_ab_to_app, testid, test_connections_size, datetime.datetime )
 
 	return redirect('/doing' )
+
+
+@app.route('/view/<testeid>')
+def view(testeid):
+	if not testeid:
+		return redirect('index')
+	return render_template('results/%s.html' % testeid)
 
 
 @app.route('/doing')
 def doingtest():
 	testid = session['testid']
 	return render_template("test.html", conf=conf, testid=testid)
+
+
+@app.route('/viewqueue')
+def viewqueue():
+	return "Tem tais apps na fila..."
 
 
 @app.route('/report/<reportid>.html')

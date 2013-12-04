@@ -6,37 +6,10 @@ import config as conf
 import json
 import base64
 import oshift
+import subprocess
+import os
 
 openshift = oshift.Openshift(host=conf.BASE_API_DOMAIN,user=conf.API_USER,passwd=conf.API_PASSWD,verbose=True)
-
-def make_request(path, headers=None, **data):
-    # import pdb
-    # pdb.set_trace()
-
-    username = conf.API_USER
-    password = conf.API_PASSWD
-    up = '%s:%s' % (username, password)
-    base64string = base64.encodestring(up)[:-1]
-
-    heads = {
-        "Authorization": "Basic %s" % base64string
-    }
-    if headers:
-        if type(headers) != dict:
-            raise Exception("The 'headers' parameter must be a dict.")
-        heads = dict(heads.items() + headers.items())
-
-    dic_data = {}
-    if data:
-        dic_data = data
-
-    print "Requesting POST on %s with data >%s<" % (path,json.dumps(dic_data))
-    r = requests.post(path, data=json.dumps(dic_data), headers=heads)
-    return r
-
-def api_version():
-    #https://openshift.redhat.com/broker/rest/api
-    r = make_request(conf.API_LOGIN_PATH)
 
 def random_hash(bits=96):
     """
@@ -52,26 +25,63 @@ def random_hash(bits=96):
 
 def create_remote_app(app_name, namespace):
     """
-    This method creates the remote app to be called by AB
+    Creates the remote app to be called by AB
     """
     print "Creating the remote app with oshift..."
 
     retorno = openshift.app_create_scale(app_name,"php-5.5",True)
 
-    # data = {
-    #     'name': "app_%s" % app_name,
-    #     'cartridge': "php-5.5",
-    #     # 'scale': True,
-    #     # 'gear_profile':'small'
-    # }
 
-    # path = conf.API_ADD_APP_PATH % {
-    #     'domain': namespace
-    # }
-    # r = make_request(path, **data)
-    # print r
+def delete_remote_app(app_name):
+    """
+    Delete the remote app
+    """
+    print "Deleting the remote app %s..." % app_name
+
+    retorno = openshift.app_delete(app_name)
+
+
+def create_result_file(app_name, out):
+    template = open('templates/results/template.html').read()
+    template = template.replace('[[OUT]]', out)
+    p = os.path.abspath('templates/results')
+    file = "%s/%s.html" % (p, app_name)
+
+    print "Creating result file..."
+    open(file,'w').write(template)
+    print "Result file created"
+
+
+def parse_ab_result(out):
+    for line in out.split('\n'):
+        print line
+
+
+def call_ab(url, c):
+    p = subprocess.Popen(['ab', '-n', c, '-c', c, '-v', '-k', '-w', url],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    return out, err
 
 
 def execute_ab_to_app(app_name, test_connections_size, time_created):
-    print "Executing ab test for %s created at %s" % (app_name, time_created)
-    print [x for x in range(1,test_connections_size)]
+    print "-> Executing ab test for %s created at %s" % (app_name, time_created)
+    namespace = conf.NAMESPACE_APP2
+    print "-> Creating app..", app_name, namespace
+    create_remote_app(app_name, namespace)
+    #call the AB test...
+    print "-> Calling AB test to created app... Conections:", test_connections_size
+    url = "http://%s-%s.getup.io/" % (app_name, namespace)
+    out, err = call_ab( url , test_connections_size )
+    print url, "="* (80-len(url)+1)
+    print out
+    print "-"*80
+    print err
+    print "="*80
+    # print [x for x in range(1,test_connections_size)]
+    print "-> Deleting remote app..."
+    delete_remote_app(app_name)
+    print "-> Completed"
+    create_result_file(app_name, out)
+

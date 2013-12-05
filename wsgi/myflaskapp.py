@@ -1,15 +1,20 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from flask import Flask, redirect, render_template, abort, session, request
+from jinja2 import TemplateNotFound
 from utils import random_hash, create_remote_app, execute_ab_to_app
 import config as conf
-import datetime
+from datetime import datetime as date
 
 from redis import Redis
 from rq import Queue
 
-q = Queue(connection=Redis())
+import gevent
+import gevent.monkey
+from gevent.pywsgi import WSGIServer
+gevent.monkey.patch_all()
 
+q = Queue(connection=Redis())
 
 app = Flask(__name__)
 app.debug = True
@@ -25,21 +30,27 @@ def index():
 def begin_test():
 
 	print "Begin test...", request.form
-	name = request.form.get('name')
-	email = request.form.get('email')
-	company = request.form.get('company')
-	site = request.form.get('site')
-	test_connections_size = request.form.get('test_connections_size')
+
+	now = date.today()
+	user_data = {
+		'name' : request.form.get('name'),
+		'email' : request.form.get('email'),
+		'company' : request.form.get('company'),
+		'site' : request.form.get('site'),
+		'test_connections_size' : request.form.get('test_connections_size'),
+		'created_at': now
+	}
 
 	testid = random_hash()
 	namespace = conf.NAMESPACE_APP2
+	test_connections_size = request.form.get('test_connections_size')
 
 	#Call to create remote app
 	# create_remote_app(testid, namespace)
 	session['testid'] = testid
 
 	#Add to queue for AB test.
-	q.enqueue(execute_ab_to_app, testid, test_connections_size, datetime.datetime )
+	q.enqueue(execute_ab_to_app, testid, test_connections_size, user_data )
 
 	return redirect('/doing' )
 
@@ -48,7 +59,10 @@ def begin_test():
 def view(testeid):
 	if not testeid:
 		return redirect('index')
-	return render_template('results/%s.html' % testeid)
+	try:
+		return render_template('results/%s.html' % testeid)
+	except TemplateNotFound:
+		return "Seu teste ainda não está concluído... aguarde!"
 
 
 @app.route('/doing')
@@ -68,4 +82,7 @@ def report(reportid):
 
 
 if __name__=="__main__":
-	app.run()
+	# app.run()
+	http_server = WSGIServer(('0.0.0.0', 5000), app)
+	http_server.serve_forever()
+

@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import random
 import requests
@@ -8,6 +8,9 @@ import base64
 import oshift
 import subprocess
 import os
+from jinja2.environment import Environment
+from jinja2.loaders import DictLoader
+import codecs
 
 openshift = oshift.Openshift(host=conf.BASE_API_DOMAIN,user=conf.API_USER,passwd=conf.API_PASSWD,verbose=True)
 
@@ -41,23 +44,42 @@ def delete_remote_app(app_name):
     retorno = openshift.app_delete(app_name)
 
 
-def create_result_file(app_name, out):
-    template = open('templates/results/template.html').read()
-    template = template.replace('[[OUT]]', out)
-    p = os.path.abspath('templates/results')
-    file = "%s/%s.html" % (p, app_name)
+def create_result_file(app_name, out, user_data):
+    """
+    create the html with result of the test with jinja2
+    """
+    template_data = {
+        'out': out
+    }
+    template_data = dict(template_data.items() + user_data.items())
+
+    print "User data created..."
+
+    p = os.path.abspath('templates')
+
+    print "Loading templates file for tender results..."
+
+    env = Environment()
+    pages = ('results/template.html', 'base.html')
+    templates = dict((name, unicode(open(os.path.sep.join([p,name]), 'rb').read(), 'utf-8')) for name in pages)
+    env.loader = DictLoader(templates)
+    template = env.get_template('results/template.html')
+
+    print "Template file readed... rendering!"
+    template_html = template.render(data=template_data)
 
     print "Creating result file..."
-    open(file,'w').write(template)
-    print "Result file created"
-
-
-def parse_ab_result(out):
-    for line in out.split('\n'):
-        print line
+    result_file_name = os.path.sep.join([p, "results", "%s.html" % app_name ])
+    f = codecs.open(result_file_name,'w','utf-8')
+    f.write(template_html)
+    f.close()
+    print "Result file %s created" % result_file_name
 
 
 def call_ab(url, c):
+    """
+    Execute the shell process that call ab program
+    """
     p = subprocess.Popen(['ab', '-n', c, '-c', c, '-v', '-k', '-w', url],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
@@ -65,8 +87,14 @@ def call_ab(url, c):
     return out, err
 
 
-def execute_ab_to_app(app_name, test_connections_size, time_created):
-    print "-> Executing ab test for %s created at %s" % (app_name, time_created)
+def execute_ab_to_app(app_name, test_connections_size, user_data):
+    """
+    Create the application
+    Call AB teste
+    Delete de application
+    Write the results to html file
+    """
+    print "-> Executing ab test for %s created at %s" % (app_name, user_data['created_at'].strftime('%d-%m-%Y %H:%M:%S'))
     namespace = conf.NAMESPACE_APP2
     print "-> Creating app..", app_name, namespace
     create_remote_app(app_name, namespace)
@@ -83,5 +111,5 @@ def execute_ab_to_app(app_name, test_connections_size, time_created):
     print "-> Deleting remote app..."
     delete_remote_app(app_name)
     print "-> Completed"
-    create_result_file(app_name, out)
+    create_result_file(app_name, out, user_data)
 

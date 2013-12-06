@@ -31,8 +31,10 @@ def create_remote_app(app_name, namespace):
     Creates the remote app to be called by AB
     """
     print "Creating the remote app with oshift..."
-
-    retorno = openshift.app_create_scale(app_name,"php-5.5",True)
+    if conf.APP2_GIT_URL:
+        retorno = openshift.app_create_scale(app_name,"php-5.5",True, init_git_url=conf.APP2_GIT_URL)
+    else:
+        retorno = openshift.app_create_scale(app_name,"php-5.5",True)
 
 
 def delete_remote_app(app_name):

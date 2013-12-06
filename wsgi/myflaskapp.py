@@ -7,18 +7,33 @@ import config as conf
 from datetime import datetime as date
 
 from redis import Redis
-from rq import Queue
+from rq import Queue, Worker, Connection
+
+from multiprocessing import Process
 
 import gevent
 import gevent.monkey
 from gevent.pywsgi import WSGIServer
+
 gevent.monkey.patch_all()
 
-q = Queue(connection=Redis())
+#Redis queue worker \/
+redisconn = Redis()
+
+q = Queue('getup', connection=redisconn)
+
+# def worker(conn):
+# 	w = Worker(q, connection=conn)
+# 	w.work()
+
+# p = Process(target=worker, args=(redisconn,))
+# p.start()
+#Redis queue worker /\
 
 app = Flask(__name__)
 app.debug = True
 app.secret_key = ")(#%02459nsgfskjfgKJHFD0"
+
 
 
 @app.route('/')

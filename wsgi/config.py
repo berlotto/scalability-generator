@@ -7,13 +7,16 @@ BASE_API_DOMAIN = "broker.getupcloud.com"
 API_USER = "demo@getupcloud.com"
 API_PASSWD = "aFbe7g<jt]nM"
 
-#for the -c parameter of AB
+APP2_GIT_URL = "https://github.com/berlotto/scalability-test-app.git"
+
+#for the -c and -n parameter of AB
 AB_TEST_CONCURRENCY = [40, 60, 80]
 #for the -n parameter 0f AB
-AB_TEST_REQUESTS = 150
+#AB_TEST_REQUESTS = 150
 
-REDIS_SERVER = "localhost"
-REDIS_PASSWORD = "ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5"
+REDIS_HOST = "localhost"
+#REDIS_PASSWORD = "ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5"
+REDIS_PASSWORD = ""
 
 #App2 Configuration
 

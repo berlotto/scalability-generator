@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+from os import getenv
 
 #API COnfiguration
 BASE_API_PREFIX = "htts://"
@@ -14,9 +15,9 @@ AB_TEST_CONCURRENCY = [40, 60, 80]
 #for the -n parameter 0f AB
 #AB_TEST_REQUESTS = 150
 
-REDIS_HOST = "localhost"
-#REDIS_PASSWORD = "ZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5"
-REDIS_PASSWORD = ""
+REDIS_HOST = getenv('OPENSHIFT_REDIS_HOST')
+REDIS_PORT = getenv('OPENSHIFT_REDIS_PORT')
+REDIS_PASSWORD = getenv('REDIS_PASSWORD')
 
 #App2 Configuration
 

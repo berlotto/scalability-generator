@@ -18,7 +18,7 @@ from gevent.pywsgi import WSGIServer
 gevent.monkey.patch_all()
 
 #Redis queue worker \/
-redisconn = Redis()
+redisconn = Redis(conf.REDIS_HOST, conf.REDIS_PORT, password=conf.REDIS_PASSWORD)
 
 q = Queue('getup', connection=redisconn)
 

@@ -30,7 +30,7 @@ def create_remote_app(app_name, namespace):
     """
     Creates the remote app to be called by AB
     """
-    print "Creating the remote app with oshift..."
+    print "-> Creating the remote app with oshift..."
     if conf.APP2_GIT_URL:
         retorno = openshift.app_create_scale(app_name,"php-5.5",True, init_git_url=conf.APP2_GIT_URL)
     else:
@@ -41,12 +41,12 @@ def delete_remote_app(app_name):
     """
     Delete the remote app
     """
-    print "Deleting the remote app %s..." % app_name
+    print "-> Deleting the remote app %s..." % app_name
 
     retorno = openshift.app_delete(app_name)
 
 
-def create_result_file(app_name, out, user_data):
+def create_result_file(app_name, out, user_data, haproxy_data):
     """
     create the html with result of the test with jinja2
     """
@@ -55,11 +55,11 @@ def create_result_file(app_name, out, user_data):
     }
     template_data = dict(template_data.items() + user_data.items())
 
-    print "User data created..."
+    print "-> User data created..."
 
     p = os.path.abspath('templates')
 
-    print "Loading templates file for tender results..."
+    print "-> Loading templates file for tender results..."
 
     env = Environment()
     pages = ('results/template.html', 'base.html')
@@ -67,10 +67,10 @@ def create_result_file(app_name, out, user_data):
     env.loader = DictLoader(templates)
     template = env.get_template('results/template.html')
 
-    print "Template file readed... rendering!"
+    print "-> Template file readed... rendering!"
     template_html = template.render(data=template_data)
 
-    print "Creating result file..."
+    print "-> Creating result file..."
     result_file_name = os.path.sep.join([p, "results", "%s.html" % app_name ])
     f = codecs.open(result_file_name,'w','utf-8')
     f.write(template_html)
@@ -78,40 +78,47 @@ def create_result_file(app_name, out, user_data):
     print "Result file %s created" % result_file_name
 
 
-def call_ab(url, c):
+def call_ab(url, c, n):
     """
     Execute the shell process that call ab program
     """
-    p = subprocess.Popen(['ab', '-n', c, '-c', c, '-v', '-k', '-w', url],
+    #\/Start thread to capture the haproxy_status data
+    #...
+    #/\
+    command = "ab -n %d -c %d -v -k -w -r %s" % (n,c,url)
+    print "-> call ab with command:", command
+    haproxy_data = [{},{},{}]
+    p = subprocess.Popen(command.split(),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
     out, err = p.communicate()
-    return out, err
+    return haproxy_data, out, err
 
 
-def execute_ab_to_app(app_name, test_connections_size, user_data):
+def execute_ab_to_app(user_data):
     """
     Create the application
     Call AB teste
     Delete de application
     Write the results to html file
     """
-    print "-> Executing ab test for %s created at %s" % (app_name, user_data['created_at'].strftime('%d-%m-%Y %H:%M:%S'))
-    namespace = conf.NAMESPACE_APP2
+    app_name = user_data['testid']
+    print "-> Executing scalability test for %s created at %s" % (app_name, user_data['created_at'].strftime('%d-%m-%Y %H:%M:%S'))
+    namespace = user_data['namespace']
     print "-> Creating app..", app_name, namespace
     create_remote_app(app_name, namespace)
     #call the AB test...
-    print "-> Calling AB test to created app... Conections:", test_connections_size
     url = "http://%s-%s.getup.io/" % (app_name, namespace)
-    out, err = call_ab( url , test_connections_size )
+    print "-> Calling AB test to created app... Conections:", user_data['test_connections_size'], "on:", url
+    haproxy, out, err = call_ab( url, int(user_data['test_connections_size']), conf.AB_TEST_REQUESTS )
     print url, "="* (80-len(url)+1)
     print out
     print "-"*80
     print err
     print "="*80
-    # print [x for x in range(1,test_connections_size)]
+    # print [x for x in range(1,test_concurrency)]
     print "-> Deleting remote app..."
     delete_remote_app(app_name)
     print "-> Completed"
-    create_result_file(app_name, out, user_data)
+    create_result_file(app_name, out, user_data, haproxy)
 

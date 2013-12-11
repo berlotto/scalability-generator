@@ -9,32 +9,23 @@ from datetime import datetime as date
 from redis import Redis
 from rq import Queue, Worker, Connection
 
-from multiprocessing import Process
-
 import gevent
 import gevent.monkey
 from gevent.pywsgi import WSGIServer
 
 gevent.monkey.patch_all()
 
-#Redis queue worker \/
-redisconn = Redis(conf.REDIS_HOST, conf.REDIS_PORT, password=conf.REDIS_PASSWORD)
+#Redis queue/connection \/
+if not conf.REDIS_PASSWORD:
+	redisconn = Redis(conf.REDIS_HOST, conf.REDIS_PORT)
+else:
+	redisconn = Redis(conf.REDIS_HOST, conf.REDIS_PORT, password=conf.REDIS_PASSWORD)
 
 q = Queue('getup', connection=redisconn)
-
-# def worker(conn):
-# 	w = Worker(q, connection=conn)
-# 	w.work()
-
-# p = Process(target=worker, args=(redisconn,))
-# p.start()
-#Redis queue worker /\
+#Redis queue/connection /\
 
 app = Flask(__name__)
-app.debug = True
-app.secret_key = ")(#%02459nsgfskjfgKJHFD0"
-
-
+app.config.from_object('config')
 
 @app.route('/')
 def index():
@@ -47,43 +38,45 @@ def begin_test():
 	print "Begin test...", request.form
 
 	now = date.today()
+	testid = random_hash()
+	namespace = conf.NAMESPACE_APP2
 	user_data = {
 		'name' : request.form.get('name'),
 		'email' : request.form.get('email'),
 		'company' : request.form.get('company'),
 		'site' : request.form.get('site'),
 		'test_connections_size' : request.form.get('test_connections_size'),
-		'created_at': now
+		'created_at': now,
+		'testid': testid,
+		'namespace': namespace,
 	}
-
-	testid = random_hash()
-	namespace = conf.NAMESPACE_APP2
-	test_connections_size = request.form.get('test_connections_size')
 
 	#Call to create remote app
 	# create_remote_app(testid, namespace)
 	session['testid'] = testid
 
 	#Add to queue for AB test.
-	q.enqueue(execute_ab_to_app, testid, test_connections_size, user_data )
+	q.enqueue_call(func=execute_ab_to_app ,
+				   args=(user_data,) ,
+				   timeout=conf.AB_TEST_TIMEOUT )
 
-	return redirect('/doing' )
+	return redirect( '/doing/%s' % testid )
 
 
-@app.route('/view/<testeid>')
-def view(testeid):
-	if not testeid:
+@app.route('/view/<testid>')
+def view(testid):
+	if not testid:
 		return redirect('index')
 	try:
-		return render_template('results/%s.html' % testeid)
+		return render_template('results/%s.html' % testid)
 	except TemplateNotFound:
 		return "Seu teste ainda não está concluído... aguarde!"
 
 
-@app.route('/doing')
-def doingtest():
-	testid = session['testid']
-	return render_template("test.html", conf=conf, testid=testid)
+@app.route('/doing/<testid>')
+def doingtest(testid):
+	# testid = session['testid']
+	return render_template("doing.html", conf=conf, testid=testid)
 
 
 @app.route('/viewqueue')

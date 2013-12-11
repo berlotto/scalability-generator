@@ -4,4 +4,4 @@
 # it could be python, php, ruby, etc.
 
 cd $OPENSHIFT_REPO_DIR/wsgi
-rqworker getup > $OPENSHIFT_PYTHON_LOG_DIR/worker.log 2>&1 &
+python worker.py getup > $OPENSHIFT_PYTHON_LOG_DIR/worker.log 2>&1 &

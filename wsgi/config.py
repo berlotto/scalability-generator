@@ -4,6 +4,7 @@ from os import getenv
 #App configuration
 DEBUG = True
 SECRET_KEY = ")(#%02459nsgfskjfgKJHFD0"
+PROPAGATE_EXCEPTIONS = True
 
 #API COnfiguration
 BASE_API_PREFIX = "htts://"

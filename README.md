@@ -1,9 +1,9 @@
 Scalability Generator
 =====================
 
-This software is a tester creator to apply in your OpenShift environment.
+This software is a Scalability Generator to use in your OpenShift environment.
 
-Based in a Flask Example application 
+Based in a Flask Example application
 
 Created by Sérgio Berlotto < sergio.berlotto@gmail.com >
 
@@ -25,7 +25,7 @@ Add this upstream flask repo
     cd flask
     git remote add upstream -m master https://github.com/getupcloud/flask-example.git
     git pull -s recursive -X theirs upstream master
-    
+
 Then push the repo upstream
 
     git push
@@ -38,7 +38,7 @@ That's it, you can now checkout your application at:
 
 To get more log messages in your openshift logs please add the following line to your code
 
-app.config['PROPAGATE_EXCEPTIONS'] = True  
+app.config['PROPAGATE_EXCEPTIONS'] = True
 
 To read more about logging in Flask please see this email
 

@@ -19,8 +19,8 @@
 """
 
 from flask import Flask, redirect, render_template, abort, session, request
+import utils
 from jinja2 import TemplateNotFound
-from utils import random_hash, create_remote_app, execute_ab_to_app
 import config as conf
 from datetime import datetime as date
 
@@ -52,11 +52,10 @@ def index():
 
 @app.route('/begin', methods=('POST',))
 def begin_test():
-
 	print "Begin test...", request.form
 
 	now = date.today()
-	testid = random_hash()
+	testid = utils.random_hash()
 	namespace = conf.NAMESPACE_APP2
 	user_data = {
 		'name' : request.form.get('name'),
@@ -74,7 +73,7 @@ def begin_test():
 	session['testid'] = testid
 
 	#Add to queue for AB test.
-	q.enqueue_call(func=execute_ab_to_app ,
+	r = q.enqueue_call(func=utils.execute_ab_to_app ,
 				   args=(user_data,) ,
 				   timeout=conf.AB_TEST_TIMEOUT )
 
@@ -89,6 +88,15 @@ def view(testid):
 		return render_template('results/%s.html' % testid)
 	except TemplateNotFound:
 		return "Seu teste ainda não está concluído... aguarde!"
+
+
+@app.route('/haproxy_stats')
+def get_haproxy_result(testid):
+    csv_url = "http://%s-%s.getup.io/haproxy-status/connstats;csv" % (testid, conf.NAMESPACE_APP2)
+    if session['runningab']:
+    	yield "uma linha..."
+    else:
+    	yield "NAO"
 
 
 @app.route('/doing/<testid>')
@@ -108,7 +116,7 @@ def report(reportid):
 
 
 if __name__=="__main__":
-	# app.run()
-	http_server = WSGIServer(('0.0.0.0', 5000), app)
-	http_server.serve_forever()
+	app.run()
+	# http_server = WSGIServer(('0.0.0.0', 5000), app)
+	# http_server.serve_forever()
 

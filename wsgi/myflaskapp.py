@@ -18,8 +18,9 @@
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from flask import Flask, redirect, render_template, abort, session, request
+from flask import Flask, redirect, render_template, abort, request, jsonify
 import utils
+import urllib2, StringIO, csv
 from jinja2 import TemplateNotFound
 import config as conf
 from datetime import datetime as date
@@ -39,7 +40,7 @@ if not conf.REDIS_PASSWORD:
 else:
 	redisconn = Redis(conf.REDIS_HOST, conf.REDIS_PORT, password=conf.REDIS_PASSWORD)
 
-q = Queue('getup', connection=redisconn)
+q = Queue(connection=redisconn)
 #Redis queue/connection /\
 
 app = Flask(__name__)
@@ -70,44 +71,45 @@ def begin_test():
 
 	#Call to create remote app
 	# create_remote_app(testid, namespace)
-	session['testid'] = testid
 
 	#Add to queue for AB test.
-	r = q.enqueue_call(func=utils.execute_ab_to_app ,
+	q.enqueue_call(func=utils.execute_ab_to_app ,
 				   args=(user_data,) ,
 				   timeout=conf.AB_TEST_TIMEOUT )
 
 	return redirect( '/doing/%s' % testid )
 
 
-@app.route('/view/<testid>')
-def view(testid):
-	if not testid:
-		return redirect('index')
-	try:
-		return render_template('results/%s.html' % testid)
-	except TemplateNotFound:
-		return "Seu teste ainda não está concluído... aguarde!"
-
-
-@app.route('/haproxy_stats')
+@app.route('/haproxy_stats/<testid>')
 def get_haproxy_result(testid):
-    csv_url = "http://%s-%s.getup.io/haproxy-status/connstats;csv" % (testid, conf.NAMESPACE_APP2)
-    if session['runningab']:
-    	yield "uma linha..."
-    else:
-    	yield "NAO"
+    try:
+		response = urllib2.urlopen("http://%s-%s.getup.io/haproxy-status/connstats;csv" % (testid, conf.NAMESPACE_APP2)).read()
+		out = StringIO.StringIO(response)
+		cr = csv.reader(out)
+
+		data = []
+		for linha in cr:
+			if "gear" in linha[1]:
+				#, 'svname', 'scur', 'smax', 'slim', 'stot', 'status'
+				#, 1       , 4     , 5     , 6     , 7     , 17
+				ldata = {
+					'svname': linha[1],
+					'scur': linha[4],
+					'smax': linha[5],
+					'slim': linha[6],
+					'stot': linha[7],
+					'status': linha[17],
+				}
+				data.append(ldata)
+
+		yield jsonify(results = data)
+    except:
+    	yield jsonify(results=[])
 
 
 @app.route('/doing/<testid>')
 def doingtest(testid):
-	# testid = session['testid']
 	return render_template("doing.html", conf=conf, testid=testid)
-
-
-@app.route('/viewqueue')
-def viewqueue():
-	return "Tem tais apps na fila..."
 
 
 @app.route('/report/<reportid>.html')

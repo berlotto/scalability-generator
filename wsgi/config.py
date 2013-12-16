@@ -27,7 +27,11 @@ REDIS_HOST = getenv('OPENSHIFT_REDIS_HOST')
 REDIS_PORT = int(getenv('OPENSHIFT_REDIS_PORT'))
 REDIS_PASSWORD = getenv('REDIS_PASSWORD')
 
-#App2 Configuration
+#e-mail configuration
+MAILGUN_KEY = "key-9f4fdjnxe7zxc9kiz59eopaexcafgeq8"
+MAILGUN_DOMAIN = "sandbox3759.mailgun.org"
+MAIL_SENDER = "you@someserver.com" # default None
+MAIL_SUBJECT = "Teste de performance concluído - GetupCloud.com"
 
 #The namespace where the APP2 will be created
 NAMESPACE_APP2 = "demo"

@@ -25,6 +25,7 @@ import base64
 import oshift
 import subprocess
 import os
+import requests
 from jinja2.environment import Environment
 from jinja2.loaders import DictLoader
 import codecs
@@ -95,6 +96,7 @@ def create_result_file(app_name, out, user_data, haproxy_data):
     print "Result file %s created" % result_file_name
 
 
+
 def call_ab(url, c, n):
     """
     Execute the shell process that call ab program
@@ -138,4 +140,36 @@ def execute_ab_to_app(user_data):
     delete_remote_app(app_name)
     print "-> Completed"
     create_result_file(app_name, out, user_data, haproxy)
+    envia_email_resultado(user_data, url)
 
+
+def envia_email_resultado(user_data, url):
+    message = """
+        Você acabou de solocitar um teste de performance no nosso ambiente.
+        O seu teste já acabou e os resultados estão disponíveis.
+        Segue abaixo como acessar:
+
+        %(url)s
+    """ % {'url':url}
+
+    _sendemail(conf.MAIL_SENDER,
+        user_data['email'],
+        conf.MAIL_SUBJECT,
+        message
+        )
+
+
+def _sendemail(from_addr, to_addr_list, subject,
+                message, cc_addr_list=[]):
+
+    _message_data = {"from": from_addr,
+          "to": to_addr_list,
+          "subject": subject,
+          "text": message}
+    if cc_addr_list:
+        _message_data['cc'] = cc_addr_list
+
+    return requests.post(
+        "https://api.mailgun.net/v2/%s/messages" % conf.MAILGUN_DOMAIN,
+        auth=("api", conf.MAILGUN_KEY),
+        data=_message_data)

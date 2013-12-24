@@ -18,21 +18,22 @@
     along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from flask import Flask, redirect, render_template, abort, request, jsonify
+from flask import Flask, redirect, render_template, abort, request, json, Response
+from jinja2 import TemplateNotFound
+from datetime import datetime as date
+from time import sleep
 import utils
 import urllib2, StringIO, csv
-from jinja2 import TemplateNotFound
 import config as conf
-from datetime import datetime as date
 
 from redis import Redis
 from rq import Queue, Worker, Connection
 
-import gevent
-import gevent.monkey
-from gevent.pywsgi import WSGIServer
+# import gevent
+# import gevent.monkey
+# from gevent.pywsgi import WSGIServer
 
-gevent.monkey.patch_all()
+# gevent.monkey.patch_all()
 
 #Redis queue/connection \/
 if not conf.REDIS_PASSWORD:
@@ -80,31 +81,43 @@ def begin_test():
 	return redirect( '/doing/%s' % testid )
 
 
-@app.route('/haproxy_stats/<testid>')
+def _haproxy_stream(testid):
+	while True:
+		sleep(2) #in seconds
+		# gevent.sleep(5) #in seconds
+		try:
+			url = "http://%s-%s.getup.io/haproxy-status/connstats;csv" % (testid, conf.NAMESPACE_APP2)
+			# print "New try to get CSV...", url
+			response = urllib2.urlopen(url).read()
+			out = StringIO.StringIO(response)
+			cr = csv.reader(out)
+
+			data = []
+			for linha in cr:
+				if "gear" in linha[1]:
+					#, 'svname', 'scur', 'smax', 'slim', 'stot', 'status'
+					#, 1       , 4     , 5     , 6     , 7     , 17
+					ldata = {
+						'svname': linha[1],
+						'scur': linha[4],
+						'smax': linha[5],
+						# 'slim': linha[6],
+						'stot': linha[7],
+						'status': linha[17],
+					}
+					data.append(ldata)
+			# print "Retunrning", json.dumps(data)
+			yield "data: %s\n\n" % json.dumps(data)
+		except Exception as e:
+			print "ERROR:", e
+			yield "data: %s\n\n" % json.dumps([])
+
+
+@app.route('/haproxy-stats/<testid>')
 def get_haproxy_result(testid):
-    try:
-		response = urllib2.urlopen("http://%s-%s.getup.io/haproxy-status/connstats;csv" % (testid, conf.NAMESPACE_APP2)).read()
-		out = StringIO.StringIO(response)
-		cr = csv.reader(out)
-
-		data = []
-		for linha in cr:
-			if "gear" in linha[1]:
-				#, 'svname', 'scur', 'smax', 'slim', 'stot', 'status'
-				#, 1       , 4     , 5     , 6     , 7     , 17
-				ldata = {
-					'svname': linha[1],
-					'scur': linha[4],
-					'smax': linha[5],
-					'slim': linha[6],
-					'stot': linha[7],
-					'status': linha[17],
-				}
-				data.append(ldata)
-
-		yield jsonify(results = data)
-    except:
-    	yield jsonify(results=[])
+    return Response(
+            _haproxy_stream(testid),
+            mimetype='text/event-stream')
 
 
 @app.route('/doing/<testid>')
@@ -119,6 +132,7 @@ def report(reportid):
 
 if __name__=="__main__":
 	app.run()
+	# print "Serving at 0.0.0.0:5000"
 	# http_server = WSGIServer(('0.0.0.0', 5000), app)
 	# http_server.serve_forever()
 

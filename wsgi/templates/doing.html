@@ -10,16 +10,23 @@ $(document).ready(function() {
             // console.log('A message has arrived!');
             // console.log(message.data);
             var dados = $.parseJSON(message.data);
-            console.log(dados)
+            // console.log(dados)
             // $('#output').append('<li>'+dados.results+'</li>');
         	$("#results-table > tbody").html("");
 
-            for(var i=0; i<dados.length; i++){
-            	dado = dados[i];
-            	console.log(dado);
-            	$('#results-table > tbody:first')
-            		.append('<tr><td>'+dado.svname+'</td><td>'+dado.scur+'</td><td>'+dado.smax+'</td><td>'+dado.stot+'</td><td>'+dado.status+'</td></tr>');
-            }
+        	if(dados.length > 0){
+
+	            for(var i=0; i<dados.length; i++){
+	            	dado = dados[i];
+	            	// console.log(dado);
+	            	$('#results-table > tbody:first')
+	            		.append('<tr><td>'+dado.svname+'</td><td>'+dado.scur+'</td><td>'+dado.smax+'</td><td>'+dado.stot+'</td><td>'+dado.status+'</td></tr>');
+	            }
+
+        	}else{
+        		$('#results-table > tbody:first')
+            		.append('<tr><td colspan="5">ainda não entrou em execução aguarde...</td></tr>');
+        	}
         };
 
         sse.onerror = function(e) {
@@ -35,22 +42,26 @@ $(document).ready(function() {
 	<div class="row">
 		<div class="large-12 columns">
 			<h2>Execução do teste de escalabilidade</h2>
-			<h3>ID: {{testid}}</h3>
-			<hr />
+			<h3>ID da sua aplicação: <strong>{{testid}}</strong></h3>
+			<hr>
 		</div>
 	</div>
 
 	<div class="row">
 		<div class="large-8 columns">
-			<div class="row">
-				<ul class="test">
-					<li>Sua aplicação foi colodada na fila para execução do teste</li>
-					<li>Assim que for concluído, será enviado para você um email com o relatório</li>
-					<li>Muito obrigado por testar o ambiente da GetupCloud.</li>
-					<!-- <li>Finalizado: veja em <a href="/report/{{testid}}.html">Relatório de Resultados</a></li> -->
-				</ul>
 
-			<table id="results-table">
+			<h3 class="subheader">Ações tomadas</h2>
+
+			<ul class="test no-bullet">
+				<li>Sua aplicação foi colodada na fila para execução do teste</li>
+				<li>Assim que for concluído, será enviado para você um email com o relatório</li>
+				<li>Muito obrigado por testar o ambiente da GetupCloud.</li>
+				<li>O relatório final também vai estar disponível através <a href="/report/{{testid}}.html">deste link</a>.</li>
+			</ul>
+
+			<h3 class="subheader">Veja algumas estatísticas em realtime da sua aplicação sendo testada:</h3>
+
+			<table id="results-table" class="table-realtime">
 				<thead>
 					<tr>
 						<th>Gear</th>
@@ -61,21 +72,28 @@ $(document).ready(function() {
 					</tr>
 				</thead>
 				<tbody>
-
+					<tr><td colspan="5">ainda não entrou em execução aguarde...</td></tr>
 				</tbody>
 			</table>
-
-			</div>
 
 		</div>
 
 		<div class="large-4 columns">
 			<h4>Getup</h4>
 			<p>A Getup é uma empresa que presta serviços de hospedagem especializada em aplicações com performance. Veja mais no  <a href="http://getupcloud.com">nosso site</a>.</p>
-
-			<h4>Esta aplicação</h4>
-			<p>Esta aplicação o ajudará a fazer um teste de performance e ambiente nos nossos servidores. Este teste é parametrizado e no final você saberá, através de um relatório, tudo o que ocorreu no teste, com comparativos, previsões de gastos, e tudo mais !</p>
-			<p>O relatório da sua aplicação ficará disponível para posterior consulta através de um link enviado para seu email.</p>
+			<h4>Algumas informações:</h4>
+			<dl>
+				<dt>Gear:</dt>
+				<dd>É o espaço de execução.</dd>
+				<dt>Corrente:</dt>
+				<dd>É o número de conexões sendo executadas no gear atualmente.</dd>
+				<dt>Máximo:</dt>
+				<dd>É o número máximo de conexões simultâneas que o gear já respondeu.</dd>
+				<dt>Total:</dt>
+				<dd>É o número total de conexões já respondidas pelo gear.</dd>
+				<dt>Status:</dt>
+				<dd>Status do gear atualmente.</dd>
+			</dl>
 		</div>
 
 	</div>

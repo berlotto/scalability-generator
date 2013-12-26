@@ -106,10 +106,11 @@ def _haproxy_stream(testid):
 						'status': linha[17],
 					}
 					data.append(ldata)
-			# print "Retunrning", json.dumps(data)
+			print "Retunrning", json.dumps(data)
 			yield "data: %s\n\n" % json.dumps(data)
 		except Exception as e:
 			print "ERROR:", e
+			print "data: %s\n\n" % json.dumps([])
 			yield "data: %s\n\n" % json.dumps([])
 
 

@@ -128,7 +128,7 @@ def doingtest(testid):
 
 @app.route('/report/<reportid>.html')
 def report(reportid):
-	return render_template("report.html", reportid=reportid, conf=conf)
+	return render_template("results/%s.html" % reportid, reportid=reportid, conf=conf)
 
 
 if __name__=="__main__":

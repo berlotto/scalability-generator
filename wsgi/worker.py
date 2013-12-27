@@ -29,7 +29,7 @@ if not getenv('REDIS_PASSWORD'):
 	redisconn = Redis(getenv('OPENSHIFT_REDIS_HOST'), int(getenv('OPENSHIFT_REDIS_PORT')) )
 else:
 	print "Com pwd"
-	redisconn = Redis(getenv('OPENSHIFT_REDIS_HOST'), getenv('OPENSHIFT_REDIS_PORT'), password=getenv('REDIS_PASSWORD'))
+	redisconn = Redis(getenv('OPENSHIFT_REDIS_HOST'), int(getenv('OPENSHIFT_REDIS_PORT')), password=getenv('REDIS_PASSWORD'))
 
 # Preload libraries
 # import library_that_you_want_preloaded

@@ -2,3 +2,5 @@
 # This is a simple post deploy hook executed after your application
 # is deployed and started.  This script gets executed directly, so
 # it could be python, php, ruby, etc.
+
+kill `ps -ef | grep worker.py | grep -v grep | awk '{ print $2 }'` > /dev/null 2>&1
